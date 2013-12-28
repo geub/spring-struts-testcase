@@ -14,7 +14,6 @@ public class SpringMockStrutsRule extends TestWatcher {
 	@Override
 	protected void starting(Description description) {
 		try {
-			ModuleConfigFactory.setFactoryClass(factoryClass);
 			StrutsAction strutsAction = description.getAnnotation(StrutsAction.class);
 			this.springMockStrutsTestCase = new SpringMockStrutsTestCase(strutsAction);
 			this.springMockStrutsTestCase.configureTest();

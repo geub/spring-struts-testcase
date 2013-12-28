@@ -1,15 +1,23 @@
 package com.github.geub.sstc.annotations;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
+import org.apache.struts.action.ActionServlet;
+
+@Retention(RetentionPolicy.RUNTIME)
 public @interface StrutsAction {
 
-	String getForward();
+	String forward() default "";
 
-	String getForwardPaths();
+	String forwardPath() default "";
 
-	String getRequestPathInfo();
+	String requestPathInfo();
 
-	String getActionMessages();
+	String[] actionMessages() default "";
 
-	String getErrorMessages();
+	String[] errorMessages() default "";
+	
+	Class<?> actionServlet() default ActionServlet.class;
 
 }

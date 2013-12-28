@@ -1,17 +1,20 @@
 package com.github.geub.test.actions;
 
+import org.junit.Rule;
 import org.junit.Test;
 
-import servletunit.struts.MockStrutsTestCase;
+import com.github.geub.sstc.annotations.StrutsAction;
+import com.github.geub.sstc.rule.SpringMockStrutsRule;
 
-public class TestLoginAction extends MockStrutsTestCase {
+public class TestLoginAction {
 
+	@Rule
+	public SpringMockStrutsRule springMockStrutsRule = new SpringMockStrutsRule();
+	
 	@Test
+	@StrutsAction(requestPathInfo = "/login",forward="success",forwardPath="/main/success.jsp")
 	public void testLoginActionSucessFull() {
-		setRequestPathInfo("/login");
-		actionPerform();
-		verifyForward("success");
-		verifyForwardPath("/main/success.jsp");
+		springMockStrutsRule.actionPerform();
 	}
 
 }
