@@ -1,0 +1,20 @@
+/bin
+/bin/.*
+/target/
+/target/.*
+/target-deploy/
+/target-deploy/.*
+/\.settings/
+/\.settings/.*
+/\.classpath
+\Q/src/main/resources/rebel.xml\E
+/src/main/resources/rebel.xml
+/rebel.xml
+/\.idea/*
+/\.idea
+=======
+*.class
+# Package Files #
+*.jar
+*.war
+*.ear
