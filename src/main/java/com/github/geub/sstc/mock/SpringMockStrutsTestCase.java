@@ -13,8 +13,9 @@ import servletunit.struts.MockStrutsTestCase;
 
 public class SpringMockStrutsTestCase extends MockStrutsTestCase {
 
-	public void setUp(String requestPath) throws Exception {
+	public void setUp(String requestPath, ActionServlet actionServlet) throws Exception {
 		super.setUp();
+		setActionServlet(actionServlet);
 		setRequestPathInfo(requestPath);
 	}
 
@@ -65,6 +66,14 @@ public class SpringMockStrutsTestCase extends MockStrutsTestCase {
 			config = actionServlet.getServletContext().getAttribute(Globals.MODULE_KEY);
 		}
 		return (ModuleConfig) config;
+	}
+
+	/**
+	 * Delegate for the actual verifiers on the original MockStrutsTestCase
+	 */
+	public void verifyForward(String forward, String forwardPath) {
+		verifyForward(forward);
+		verifyForwardPath(forwardPath);
 	}
 
 }
