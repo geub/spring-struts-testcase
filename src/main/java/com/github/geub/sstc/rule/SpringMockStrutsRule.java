@@ -1,8 +1,13 @@
 package com.github.geub.sstc.rule;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.struts.action.ActionServlet;
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
+
+import servletunit.HttpServletRequestSimulator;
 
 import com.github.geub.sstc.annotations.StrutsAction;
 import com.github.geub.sstc.mock.SpringMockStrutsTestCase;
@@ -39,6 +44,22 @@ public class SpringMockStrutsRule extends TestWatcher {
 
 	protected StrutsAction getStrutsActionAnnotation(Description description) {
 		return description.getAnnotation(StrutsAction.class);
+	}
+
+	public HttpServletRequest getRequest() {
+		return this.springMockStrutsTestCase.getRequest();
+	}
+
+	public void setCookies(Cookie... cookies) {
+		getRequestSimulator().setCookies(cookies);
+	}
+
+	private HttpServletRequestSimulator getRequestSimulator() {
+		return (HttpServletRequestSimulator) getRequest();
+	}
+
+	public void addCookie(String key, String value) {
+		getRequestSimulator().addCookie(new Cookie(key, value));
 	}
 
 	public void doAction() {

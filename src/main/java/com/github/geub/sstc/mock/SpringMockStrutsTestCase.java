@@ -1,5 +1,6 @@
 package com.github.geub.sstc.mock;
 
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 
 import org.apache.struts.Globals;
@@ -9,12 +10,20 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.struts.ContextLoaderPlugIn;
 
+import servletunit.HttpServletRequestSimulator;
+import servletunit.ServletContextSimulator;
 import servletunit.struts.MockStrutsTestCase;
+
+import com.github.geub.sstc.servlet.MockServletConfig;
 
 public class SpringMockStrutsTestCase extends MockStrutsTestCase {
 
 	public void setUp(String requestPath, ActionServlet actionServlet) throws Exception {
 		super.setUp();
+		this.config = new MockServletConfig();
+		ServletContext servletContext = this.config.getServletContext();
+		this.request = new HttpServletRequestSimulator(servletContext);
+		this.context = (ServletContextSimulator) servletContext;
 		setActionServlet(actionServlet);
 		setRequestPathInfo(requestPath);
 	}
@@ -22,12 +31,12 @@ public class SpringMockStrutsTestCase extends MockStrutsTestCase {
 	@Override
 	public ActionServlet getActionServlet() {
 		ActionServlet actionServlet = super.getActionServlet();
-		initializeSpringContextIfNecessary(actionServlet);
+		initializeSpringContext(actionServlet);
 		return actionServlet;
 	}
 
-	private void initializeSpringContextIfNecessary(ActionServlet actionServlet) {
-		ModuleConfig moduleConfig = getModuleConfig(actionServlet);
+	private void initializeSpringContext(ActionServlet actionServlet) {
+		ModuleConfig moduleConfig = getModuleConfig();
 		String attrName = getAttrName(moduleConfig);
 		WebApplicationContext webApplicationContext = WebApplicationContextUtils.getWebApplicationContext(actionServlet.getServletContext(), attrName);
 		if (webApplicationContext != null) {
@@ -60,10 +69,10 @@ public class SpringMockStrutsTestCase extends MockStrutsTestCase {
 	/**
 	 * Copied from the ActionServlet class, was a protected method, and the ActionServlet class will not be overridden cause the user may want to override itself.
 	 */
-	private ModuleConfig getModuleConfig(ActionServlet actionServlet) {
+	private ModuleConfig getModuleConfig() {
 		Object config = this.request.getAttribute(Globals.MODULE_KEY);
 		if (config == null) {
-			config = actionServlet.getServletContext().getAttribute(Globals.MODULE_KEY);
+			config = this.context.getAttribute(Globals.MODULE_KEY);
 		}
 		return (ModuleConfig) config;
 	}
