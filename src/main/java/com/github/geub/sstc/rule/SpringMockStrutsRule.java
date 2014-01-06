@@ -15,6 +15,7 @@ import com.github.geub.sstc.mock.SpringMockStrutsTestCase;
 public class SpringMockStrutsRule extends TestWatcher {
 
 	private ActionServlet actionServlet;
+	private SpringMockStrutsTestCase springMockStrutsTestCase = new SpringMockStrutsTestCase();
 
 	public SpringMockStrutsRule(ActionServlet customActionServlet) {
 		this.actionServlet = customActionServlet;
@@ -23,8 +24,6 @@ public class SpringMockStrutsRule extends TestWatcher {
 	public SpringMockStrutsRule() {
 		this(new ActionServlet());
 	}
-
-	private SpringMockStrutsTestCase springMockStrutsTestCase = new SpringMockStrutsTestCase();
 
 	@Override
 	protected void starting(Description description) {
@@ -42,6 +41,11 @@ public class SpringMockStrutsRule extends TestWatcher {
 		this.springMockStrutsTestCase.verifyForward(strutsActionAnnotation.forward(), strutsActionAnnotation.forwardPath());
 	}
 
+	@Override
+	protected void finished(Description description) {
+		this.springMockStrutsTestCase.endRequest();
+	}
+
 	protected StrutsAction getStrutsActionAnnotation(Description description) {
 		return description.getAnnotation(StrutsAction.class);
 	}
@@ -54,12 +58,12 @@ public class SpringMockStrutsRule extends TestWatcher {
 		getRequestSimulator().setCookies(cookies);
 	}
 
-	private HttpServletRequestSimulator getRequestSimulator() {
-		return (HttpServletRequestSimulator) getRequest();
-	}
-
 	public void addCookie(String key, String value) {
 		getRequestSimulator().addCookie(new Cookie(key, value));
+	}
+
+	private HttpServletRequestSimulator getRequestSimulator() {
+		return (HttpServletRequestSimulator) getRequest();
 	}
 
 	public void doAction() {

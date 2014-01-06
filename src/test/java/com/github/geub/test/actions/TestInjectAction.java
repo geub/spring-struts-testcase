@@ -6,15 +6,15 @@ import org.junit.Test;
 import com.github.geub.sstc.annotations.StrutsAction;
 import com.github.geub.sstc.rule.SpringMockStrutsRule;
 
-public class TestLoginAction {
+public class TestInjectAction {
 
 	@Rule
 	public SpringMockStrutsRule springMockStrutsRule = new SpringMockStrutsRule();
-	
+
 	@Test
-	@StrutsAction(requestPathInfo = "/login",forward="success",forwardPath="/main/success.jsp")
-	public void testLoginActionSucessFull() {
-		springMockStrutsRule.doAction();
+	@StrutsAction(requestPathInfo = "/inject", forward = "success", forwardPath = "/inject/bean.jsp")
+	public void testInjectComponentToActionSucessFull() {
+		this.springMockStrutsRule.doAction();
 	}
 
 }

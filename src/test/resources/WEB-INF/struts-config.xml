@@ -4,15 +4,17 @@
           "http://jakarta.apache.org/struts/dtds/struts-config_1_1.dtd">
 <struts-config>
     <form-beans>
-        <form-bean name="loginForm" type="com.github.geub.test.forms.LoginForm"/>
+        <form-bean name="injectionForm" type="com.github.geub.test.forms.InjectionForm"/>
     </form-beans>
-    <global-forwards>
-        <forward name="login" path="/login/login.jsp"/>
-        <forward name="success" path="/main/success.jsp"/>
-    </global-forwards>
+
     <action-mappings>
-        <action path="/login" type="com.github.geub.test.actions.LoginAction" name="loginForm" input="/login/login.jsp" scope="request" />
-    </action-mappings>    
+        <action path="/inject" type="com.github.geub.test.actions.InjectAction" input="success" name="loginForm" scope="request">
+        	<forward name="success" path="/inject/bean.jsp"/>
+        </action>
+        <action path="/injectScopeBean" type="com.github.geub.test.actions.InjectScopedBeanAction" input="success" name="injectionForm" scope="request" >
+        	<forward name="success" path="/inject/beanScopedBean.jsp"/>
+        </action>
+    </action-mappings>       
 
 	<controller processorClass="org.springframework.web.struts.AutowiringRequestProcessor" />
 
