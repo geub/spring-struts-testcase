@@ -3,6 +3,7 @@ package com.github.geub.sstc.rule;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.struts.action.Action;
 import org.apache.struts.action.ActionServlet;
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
@@ -29,7 +30,8 @@ public class SpringMockStrutsRule extends TestWatcher {
 	protected void starting(Description description) {
 		try {
 			StrutsAction strutsAction = getStrutsActionAnnotation(description);
-			this.springMockStrutsTestCase.setUp(strutsAction.requestPathInfo(), this.actionServlet);
+			this.springMockStrutsTestCase.setUp(strutsAction.requestPath(), this.actionServlet);
+			this.springMockStrutsTestCase.actionPerform();
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
@@ -37,8 +39,9 @@ public class SpringMockStrutsRule extends TestWatcher {
 
 	@Override
 	protected void succeeded(Description description) {
+		this.springMockStrutsTestCase.executeAction();
 		StrutsAction strutsActionAnnotation = getStrutsActionAnnotation(description);
-		this.springMockStrutsTestCase.verifyForward(strutsActionAnnotation.forward(), strutsActionAnnotation.forwardPath());
+		this.springMockStrutsTestCase.verifyForward(strutsActionAnnotation.expectedForward(), strutsActionAnnotation.expectedForwardPath());
 	}
 
 	@Override
@@ -48,6 +51,10 @@ public class SpringMockStrutsRule extends TestWatcher {
 
 	protected StrutsAction getStrutsActionAnnotation(Description description) {
 		return description.getAnnotation(StrutsAction.class);
+	}
+
+	public Action getAction() {
+		return this.springMockStrutsTestCase.getAction();
 	}
 
 	public HttpServletRequest getRequest() {
@@ -66,8 +73,12 @@ public class SpringMockStrutsRule extends TestWatcher {
 		return (HttpServletRequestSimulator) getRequest();
 	}
 
-	public void doAction() {
+	public void prepareAction() {
 		this.springMockStrutsTestCase.actionPerform();
+	}
+
+	public void doAction() {
+		this.springMockStrutsTestCase.executeAction();
 	}
 
 }

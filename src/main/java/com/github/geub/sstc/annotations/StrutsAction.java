@@ -6,14 +6,14 @@ import java.lang.annotation.RetentionPolicy;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface StrutsAction {
 
-	String forward() default "";
+	String expectedForward() default "";
 
-	String forwardPath() default "";
+	String expectedForwardPath() default "";
 
-	String requestPathInfo();
+	String requestPath();
 
-	String[] actionMessages() default "";
+	String[] expectedActionMessages() default "";
 
-	String[] errorMessages() default "";
+	String[] expectedErrorMessages() default "";
 
 }

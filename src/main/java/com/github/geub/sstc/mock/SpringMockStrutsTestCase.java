@@ -2,13 +2,11 @@ package com.github.geub.sstc.mock;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import junit.framework.AssertionFailedError;
 
 import org.apache.struts.Globals;
+import org.apache.struts.action.Action;
 import org.apache.struts.action.ActionServlet;
+import org.apache.struts.action.DelegatingActionServlet;
 import org.apache.struts.config.ModuleConfig;
 import org.springframework.context.ApplicationContext;
 import org.springframework.web.context.WebApplicationContext;
@@ -17,7 +15,6 @@ import org.springframework.web.struts.ContextLoaderPlugIn;
 
 import servletunit.HttpServletRequestSimulator;
 import servletunit.ServletContextSimulator;
-import servletunit.struts.ExceptionDuringTestError;
 import servletunit.struts.MockStrutsTestCase;
 
 import com.github.geub.sstc.plugin.TestXmlWebApplicationContext;
@@ -35,7 +32,7 @@ public class SpringMockStrutsTestCase extends MockStrutsTestCase {
 		ServletContext servletContext = this.config.getServletContext();
 		this.request = new HttpServletRequestSimulator(servletContext);
 		this.context = (ServletContextSimulator) servletContext;
-		setActionServlet(actionServlet);
+		setActionServlet(new DelegatingActionServlet(actionServlet));
 		setRequestPathInfo(requestPath);
 	}
 
@@ -100,55 +97,6 @@ public class SpringMockStrutsTestCase extends MockStrutsTestCase {
 		return new ContextLoaderPlugIn();
 	}
 
-	@Override
-	public void actionPerform() {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Entering");
-		}
-		if (!this.requestPathSet) {
-			throw new IllegalStateException("You must call setRequestPathInfo() prior to calling actionPerform().");
-		}
-		if (!this.isInitialized) {
-			throw new AssertionFailedError(
-				"You are overriding the setUp() method without calling super.setUp().  You must call the superclass setUp() method in your TestCase subclass to ensure proper initialization.");
-		}
-		HttpServletRequest request = this.request;
-		HttpServletResponse response = this.response;
-		if (this.requestWrapper != null) {
-			request = this.requestWrapper;
-		}
-		if (this.responseWrapper != null) {
-			response = this.responseWrapper;
-		}
-		try {
-			ActionServlet actionServlet = this.getActionServlet();
-			beforeDoPost(this.webApplicationContext);
-			actionServlet.doPost(request, response);
-		} catch (NullPointerException npe) {
-			String message = "A NullPointerException was thrown.  This may indicate an error in your ActionForm, or "
-				+ "it may indicate that the Struts ActionServlet was unable to find struts config file.  "
-				+ "TestCase is running from " + System.getProperty("user.dir") + " directory.  "
-				+ "Context directory ";
-			if (this.context.getContextDirectory() == null) {
-				message += "has not been set.  Try calling setContextDirectory() with a relative or absolute path";
-			} else {
-				message = message + "is " + this.context.getContextDirectory().getAbsolutePath();
-			}
-			message = message + ".  struts config file must be found under the context directory, "
-				+ "the directory the test case is running from, or in the classpath.";
-			throw new ExceptionDuringTestError(message, npe);
-		} catch (Exception e) {
-			throw new ExceptionDuringTestError("An uncaught exception was thrown during actionExecute()", e);
-		}
-		if (logger.isDebugEnabled()) {
-			logger.debug("Exiting");
-		}
-	}
-
-	protected void beforeDoPost(WebApplicationContext webApplicationContext) {
-
-	}
-
 	/**
 	 * Copied from the ActionServlet class, was a protected method, and the ActionServlet class will not be overridden cause the user may want to override itself.
 	 */
@@ -166,6 +114,22 @@ public class SpringMockStrutsTestCase extends MockStrutsTestCase {
 
 	public ApplicationContext getApplicationContext() {
 		return this.webApplicationContext;
+	}
+
+	public void executeAction() {
+		try {
+			getDelegatingTestActionServlet().executeAction(this.request, this.response);
+		} catch (Exception e) {
+			throw new IllegalStateException("Was not possible to execute the action", e);
+		}
+	}
+
+	public Action getAction() {
+		return getDelegatingTestActionServlet().getAction();
+	}
+
+	private DelegatingActionServlet getDelegatingTestActionServlet() {
+		return (DelegatingActionServlet) this.actionServlet;
 	}
 
 }
