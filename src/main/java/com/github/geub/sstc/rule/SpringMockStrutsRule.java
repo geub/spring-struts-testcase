@@ -5,13 +5,17 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.struts.action.Action;
+import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionServlet;
+import org.junit.Test;
+import org.junit.internal.AssumptionViolatedException;
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
 
 import servletunit.HttpServletRequestSimulator;
 
 import com.github.geub.sstc.annotations.StrutsAction;
+import com.github.geub.sstc.exception.IllegalStatusException;
 import com.github.geub.sstc.mock.SpringMockStrutsTestCase;
 
 public class SpringMockStrutsRule extends TestWatcher {
@@ -46,11 +50,19 @@ public class SpringMockStrutsRule extends TestWatcher {
 
 	@Override
 	protected void succeeded(Description description) {
-		if (!this.actionExecutedAlready) {
-			doAction();
+		try {
+			if (!this.actionExecutedAlready) {
+				doAction();
+			}
+			StrutsAction strutsActionAnnotation = getStrutsActionAnnotation(description);
+			this.springMockStrutsTestCase.verifyForward(strutsActionAnnotation.expectedForward(), strutsActionAnnotation.expectedForwardPath());
+		} catch (Throwable e) {
+			Class<? extends Throwable> expected = description.getAnnotation(Test.class).expected();
+			if (e.getClass().equals(expected)) {
+				throw new AssumptionViolatedException("Expected exception on the struts");
+			}
+			throw new IllegalStateException(e);
 		}
-		StrutsAction strutsActionAnnotation = getStrutsActionAnnotation(description);
-		this.springMockStrutsTestCase.verifyForward(strutsActionAnnotation.expectedForward(), strutsActionAnnotation.expectedForwardPath());
 	}
 
 	@Override
@@ -63,7 +75,13 @@ public class SpringMockStrutsRule extends TestWatcher {
 	}
 
 	public Action getAction() {
+		validateStrutsStatus(StrutsStatus.REQUEST_PROCESSED);
 		return this.springMockStrutsTestCase.getAction();
+	}
+
+	public ActionForm getForm() {
+		validateStrutsStatus(StrutsStatus.REQUEST_PROCESSED);
+		return this.springMockStrutsTestCase.getActionForm();
 	}
 
 	public HttpServletRequest getRequest() {
@@ -97,8 +115,16 @@ public class SpringMockStrutsRule extends TestWatcher {
 
 	private void validateStrutsStatus(StrutsStatus expected) {
 		if (!expected.equals(this.strutsStatus)) {
-			throw new IllegalStateException(String.format("Invalid status, should be %s and is %s", expected.toString(), this.strutsStatus.toString()));
+			throw new IllegalStatusException(String.format("Invalid status, should be %s and is %s", expected.toString(), this.strutsStatus.toString()));
 		}
+	}
+
+	@Override
+	protected void failed(Throwable e, Description description) {
+		if (!(e instanceof IllegalStatusException)) {
+			return;
+		}
+		// TODO Logic to explain what used depending of the status
 	}
 
 }

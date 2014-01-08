@@ -16,9 +16,4 @@ public class TestInjectAction {
 	public void testInjectComponentToActionSucessFull() {
 	}
 
-	@Test
-	@StrutsAction(requestPath = "/inject", expectedForward = "success", expectedForwardPath = "/inject/bean.jsp", prepareAction = false)
-	public void testInjectComponentToActionAgainVerifyStatus() {
-	}
-
 }
