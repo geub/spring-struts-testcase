@@ -2,6 +2,7 @@ package com.github.geub.sstc.rule;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.struts.action.Action;
 import org.apache.struts.action.ActionServlet;
@@ -17,6 +18,8 @@ public class SpringMockStrutsRule extends TestWatcher {
 
 	private ActionServlet actionServlet;
 	private SpringMockStrutsTestCase springMockStrutsTestCase = new SpringMockStrutsTestCase();
+	private boolean actionExecutedAlready = false;
+	private StrutsStatus strutsStatus = StrutsStatus.STARTED;
 
 	public SpringMockStrutsRule(ActionServlet customActionServlet) {
 		this.actionServlet = customActionServlet;
@@ -29,9 +32,13 @@ public class SpringMockStrutsRule extends TestWatcher {
 	@Override
 	protected void starting(Description description) {
 		try {
+			validateStrutsStatus(StrutsStatus.STARTED);
 			StrutsAction strutsAction = getStrutsActionAnnotation(description);
 			this.springMockStrutsTestCase.setUp(strutsAction.requestPath(), this.actionServlet);
-			this.springMockStrutsTestCase.actionPerform();
+			this.strutsStatus = StrutsStatus.CONFIGURED;
+			if (strutsAction.prepareAction()) {
+				prepareAction();
+			}
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
@@ -39,7 +46,9 @@ public class SpringMockStrutsRule extends TestWatcher {
 
 	@Override
 	protected void succeeded(Description description) {
-		this.springMockStrutsTestCase.executeAction();
+		if (!this.actionExecutedAlready) {
+			doAction();
+		}
 		StrutsAction strutsActionAnnotation = getStrutsActionAnnotation(description);
 		this.springMockStrutsTestCase.verifyForward(strutsActionAnnotation.expectedForward(), strutsActionAnnotation.expectedForwardPath());
 	}
@@ -49,7 +58,7 @@ public class SpringMockStrutsRule extends TestWatcher {
 		this.springMockStrutsTestCase.endRequest();
 	}
 
-	protected StrutsAction getStrutsActionAnnotation(Description description) {
+	private StrutsAction getStrutsActionAnnotation(Description description) {
 		return description.getAnnotation(StrutsAction.class);
 	}
 
@@ -74,11 +83,30 @@ public class SpringMockStrutsRule extends TestWatcher {
 	}
 
 	public void prepareAction() {
+		validateStrutsStatus(StrutsStatus.CONFIGURED);
 		this.springMockStrutsTestCase.actionPerform();
+		this.strutsStatus = StrutsStatus.REQUEST_PROCESSED;
 	}
 
-	public void doAction() {
+	public HttpServletResponse doAction() {
+		validateStrutsStatus(StrutsStatus.REQUEST_PROCESSED);
 		this.springMockStrutsTestCase.executeAction();
+		this.strutsStatus = StrutsStatus.ACTION_EXECUTED;
+		return this.springMockStrutsTestCase.getResponse();
 	}
+
+	private void validateStrutsStatus(StrutsStatus expected) {
+		if (!expected.equals(this.strutsStatus)) {
+			throw new IllegalStateException(String.format("Invalid status, should be %s and is %s", expected.toString(), this.strutsStatus.toString()));
+		}
+	}
+
+}
+
+enum StrutsStatus {
+	STARTED,
+	CONFIGURED,
+	REQUEST_PROCESSED,
+	ACTION_EXECUTED
 
 }

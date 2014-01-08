@@ -12,9 +12,8 @@ public class TestInjectScopedBeanAction {
 	public SpringMockStrutsRule springMockStrutsRule = new SpringMockStrutsRule();
 
 	@Test
-	@StrutsAction(requestPathInfo = "/injectScopeBean", forward = "success", forwardPath = "/inject/beanScopedBean.jsp")
+	@StrutsAction(requestPath = "/injectScopeBean", expectedForward = "success", expectedForwardPath = "/inject/beanScopedBean.jsp")
 	public void testInjectionOfScopedBeansSucessFull() {
-		this.springMockStrutsRule.prepareAction();
 	}
 
 }

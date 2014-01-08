@@ -12,9 +12,13 @@ public class TestInjectAction {
 	public SpringMockStrutsRule springMockStrutsRule = new SpringMockStrutsRule();
 
 	@Test
-	@StrutsAction(requestPathInfo = "/inject", forward = "success", forwardPath = "/inject/bean.jsp")
+	@StrutsAction(requestPath = "/inject", expectedForward = "success", expectedForwardPath = "/inject/bean.jsp")
 	public void testInjectComponentToActionSucessFull() {
-		this.springMockStrutsRule.doAction();
+	}
+
+	@Test
+	@StrutsAction(requestPath = "/inject", expectedForward = "success", expectedForwardPath = "/inject/bean.jsp", prepareAction = false)
+	public void testInjectComponentToActionAgainVerifyStatus() {
 	}
 
 }

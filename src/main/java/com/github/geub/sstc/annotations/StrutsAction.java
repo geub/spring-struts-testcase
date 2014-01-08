@@ -16,4 +16,6 @@ public @interface StrutsAction {
 
 	String[] expectedErrorMessages() default "";
 
+	boolean prepareAction() default true;
+
 }

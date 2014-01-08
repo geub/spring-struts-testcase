@@ -2,11 +2,12 @@ package com.github.geub.sstc.mock;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.struts.Globals;
 import org.apache.struts.action.Action;
 import org.apache.struts.action.ActionServlet;
-import org.apache.struts.action.DelegatingActionServlet;
+import org.apache.struts.action.DelegatingTestActionServlet;
 import org.apache.struts.config.ModuleConfig;
 import org.springframework.context.ApplicationContext;
 import org.springframework.web.context.WebApplicationContext;
@@ -32,7 +33,7 @@ public class SpringMockStrutsTestCase extends MockStrutsTestCase {
 		ServletContext servletContext = this.config.getServletContext();
 		this.request = new HttpServletRequestSimulator(servletContext);
 		this.context = (ServletContextSimulator) servletContext;
-		setActionServlet(new DelegatingActionServlet(actionServlet));
+		setActionServlet(new DelegatingTestActionServlet(actionServlet));
 		setRequestPathInfo(requestPath);
 	}
 
@@ -128,8 +129,8 @@ public class SpringMockStrutsTestCase extends MockStrutsTestCase {
 		return getDelegatingTestActionServlet().getAction();
 	}
 
-	private DelegatingActionServlet getDelegatingTestActionServlet() {
-		return (DelegatingActionServlet) this.actionServlet;
+	private DelegatingTestActionServlet getDelegatingTestActionServlet() {
+		return (DelegatingTestActionServlet) this.actionServlet;
 	}
 
 }
