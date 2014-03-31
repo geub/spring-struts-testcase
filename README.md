@@ -3,7 +3,15 @@ spring-struts-testcase
 
 Spring struts testcase was created to help creating tests utilizing strutstestcase (ref) that use spring. If you have a customized Request processor you can use this framework to test it too.
 
-Testing action
+Adding to the pom
+-----------------
+    <dependency>
+        <groupId>com.github.geub</groupId>
+        <artifactId>spring-struts-testcase</artifactId>
+        <version>0.1.0</version>
+    <dependency>
+
+Testing a action
 --------------
 
 The following class might be something you want to test it:
