@@ -94,7 +94,7 @@ You can use to test request and session scoped beans:
     
     }
     
-        @Component
+    @Component
     @Scope("request")
     public class RequestScopedBean {
     
@@ -107,7 +107,7 @@ You can use to test request and session scoped beans:
     
     }
     
-        @Component
+    @Component
     @Scope("session")
     public class SessionScopedBean {
     
@@ -121,4 +121,11 @@ You can use to test request and session scoped beans:
     }
     
 Its gonna work the same way, you dont have to put anything else in the annotation.
+
+
+As the test starts some of the request processor code its executed (form creation, validation, etc...), if you wanna do somenthing before this steps, you just set the prepareAction property on the @StrutsAction to false. But after that you have to manually call prepareAction from the SpringMockStrutsTestCaseRule.
+
+The second part of the request processor (execution of the action) you can call from the test body using doAction method, this method returns HttpServletResponse object so you can assert something that the action put on the response.
+
+
 
